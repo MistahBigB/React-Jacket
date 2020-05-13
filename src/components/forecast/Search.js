@@ -15,8 +15,11 @@ const dateBuilder = (d) => {
 }
 
 const Search = () => {
+
     const [query, setQuery] = useState('');
     const [weather, setWeather] = useState({});
+    const [jacket, setJacket] = useState('');
+    const [clouds, setClouds] = useState('');
 
     // http://cors-anywhere.herokuapp.com/
 
@@ -25,15 +28,14 @@ const Search = () => {
         axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${query}&units=imperial&appid=fa1cf0341b6f15f31e7672b24b61df94`)
         .then(res => {
             const cityData = res.data;
-            console.log(cityData);
             setWeather(res.data);
+            setClouds(cloudConditions(res.data))
+            setJacket(jacketWeather(res.data))
             setQuery('');       
         }).catch(err => console.log(err))
     }
 
-    console.log(weather)
-
-    const clouds = ({weather}) => { 
+    const cloudConditions = (weather) => {
          // try with ? ternary operators
         if (weather.clouds.all < 12) {
             return 'Clear'
@@ -46,9 +48,7 @@ const Search = () => {
         }
     }
 
-    // console.log(clouds(weather))
-
-    const jacket = ({weather}) => {
+    const jacketWeather = (weather) => {
         if (weather.main.feels_like < 40) {
             return 'You should wear a jacket and a hat!'
         } else if (weather.main.feels_like < 50 && weather.main.feels_like > 40) {
@@ -89,11 +89,10 @@ const Search = () => {
                 <div>
                     <h1 className='location'>{weather.name}, {weather.sys.country}</h1>
                     <h1 className='forecase'>{weather.weather[0].description}</h1>
-                    <div className='clouds'>{() => clouds(weather)}</div>
-                    <div className='jacket'>{() => jacket(weather)}</div>
+                    <div className='clouds'>{clouds}</div>
+                    <div className='jacket'>{jacket}</div>
                     <div className='temperature'>It's {Math.round(weather.main.temp)} °F right now!</div>                
                     <div className='temperature2'>It feels like {Math.round(weather.main.feels_like)} °F right now!</div>
-
                     <div className='windspeed'>Wind speed is currently  {Math.round(weather.wind.speed)} mph</div>  
                 </div>
             ) : ('') }

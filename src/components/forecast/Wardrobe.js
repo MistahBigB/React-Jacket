@@ -20,6 +20,15 @@ export default class Wardrobe extends Component {
         // }
 
         
+
+
+        // const removeValue = () => {
+
+        // }
+    }
+
+    render(){
+
         const addValue = () => {
             var select = document.getElementById('select');
             var addVal = document.getElementById('add').value;
@@ -30,12 +39,6 @@ export default class Wardrobe extends Component {
             select.appendChild(newOption, select.lastChild)
         }
 
-        // const removeValue = () => {
-
-        // }
-    }
-
-    render(){
         return (
             <>
             <h1>Lion and Witch absent, but you can still edit your Wardrobe!</h1>
