@@ -15,9 +15,7 @@ export default class Wardrobe extends Component {
                 { id: '5', article: 'Accessories' },
             ]
         }
-        // const removeValue = () => {
 
-        // }
     }
 
     render(){
@@ -30,17 +28,34 @@ export default class Wardrobe extends Component {
 
             newOption.appendChild(newOptionVal);
             select.appendChild(newOption, select.lastChild)
+            console.log(this.articles)
+        }
+
+        const removeValue = (index) => {
+            const copyArticles = Object.assign([], this.state.articles)
+            //deletes the item at the top of the select
+            // need to ensure that the item selected is deleted
+            copyArticles.splice(index, 1)
+            this.setState({
+                articles : copyArticles
+            })
+        }
+
+        const selectArticle = (e) => {  
+            console.log(this.ref.articleSelector.value)
         }
 
         return (
             <>
             <h1>Lion and Witch absent, but you can still edit your Wardrobe!</h1>
         
-            <select id='select'>
+            <select ref='articleSelector' id='select' onChange={(e) => {selectArticle()}}>
                 {this.state.articles.map(article => (
                     <option 
                         key={article.id} 
-                        value={article.article}>
+                        value={article.article}
+                        // delete={removeValue.bind(article.id)}
+                        >
                         {article.article}
                     </option>
                 ))}
@@ -49,7 +64,10 @@ export default class Wardrobe extends Component {
             <div className='add-article'>
                 <input className='add-article' id='add' type='text' placeholder='add category'></input>
                 <button onClick={() => addValue()}>Add your new Clothing Category</button>
-            {/* onSubmit={() => addArticle.add(option)} */}
+            </div>
+            <div className='remove-article'>
+
+            <button onClick={() => removeValue()}>Remove this Clothing Category</button>
             </div>
 
         {/* <form onSubmit={handleSubmit(onSubmit)}>
