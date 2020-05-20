@@ -42,7 +42,7 @@ export default class Wardrobe extends Component {
         }
 
         const selectArticle = (e) => {  
-            console.log(this.ref.articleSelector.value)
+            console.log(this.articleSelector.value)
         }
 
         return (
