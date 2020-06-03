@@ -27,7 +27,6 @@ const Search = () => {
         e.preventDefault()
         axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${query}&units=imperial&appid=fa1cf0341b6f15f31e7672b24b61df94`)
         .then(res => {
-            const cityData = res.data;
             setWeather(res.data);
             setClouds(cloudConditions(res.data))
             setJacket(jacketWeather(res.data))
