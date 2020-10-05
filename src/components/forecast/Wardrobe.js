@@ -1,73 +1,152 @@
-import React, { Component } from 'react';
+import Axios from 'axios';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import router from './routes/wardrobe';
 
-export default class Wardrobe extends Component {
+export default class Wardrobe extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            selectedOption: null,
-            articles: [
-                { id: '1', article: 'Hats' },
-                { id: '2', article: 'Light Outerwear' },
-                { id: '3', article: 'Heavy Outerwear' },
-                { id: '4', article: 'Footwear' },
-                { id: '5', article: 'Accessories' },
-            ]
+            selectedOption: '',
+            categories: [
+                { category: 'Hats' },
+                { category: 'Light Outerwear' },
+                { category: 'Heavy Outerwear' },
+                { category: 'Footwear' },
+                { category: 'Accessories' }
+            ],
+            addValue: '',
+            categoryValues: null,
+            isEditing: false
         }
 
     }
 
+    componentDidMount(){
+        Axios.get('/wardrobe')
+        .then(res => {
+            this.setState({categoryValues: res.data})
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    }
+
     render(){
 
-        const addValue = () => {
-            var select = document.getElementById('select');
-            var addVal = document.getElementById('add').value;
-            var newOption = document.createElement('OPTION');
-            var newOptionVal = document.createTextNode(addVal);
-
-            newOption.appendChild(newOptionVal);
-            select.appendChild(newOption, select.lastChild)
-            console.log(this.articles)
+        const addCategory = () => {
+            const context = {
+                category: this.state.addValue
+            }
+            // re renders page while concatting context to current categories
+            // push does not work bc it returns an int of new array len, must use concat to return new array
+            this.setState({categories: this.state.categories.concat(context)})
+            // this.setState({document.getElementById('add').value = ''});
+            // need a check to see if category already exists
         }
 
-        const removeValue = (index) => {
-            const copyArticles = Object.assign([], this.state.articles)
-            //deletes the item at the top of the select
-            // need to ensure that the item selected is deleted
-            copyArticles.splice(index, 1)
-            this.setState({
-                articles : copyArticles
+        const handleChange = (evt) => {
+            // handles the change for adding values
+            evt.preventDefault();
+            console.log(evt.target.value)
+            this.setState({addValue: evt.target.value})
+
+        }
+
+        const removeValue = () => {
+            this.state.categories.forEach(item => {
+                // console.log(item.category, this.state.selectedOption, 'all this')
+                if (item.category === this.state.selectedOption) {
+                    // console.log('getting there!')
+                    this.state.categories.splice(this.state.categories.indexOf(item), 1)
+                    // console.log(this.state.categories)
+                    this.setState({categories: this.state.categories})
+                }
             })
+            // copyCategories.slice(this.state.categories.indexOf(selected), 1)
         }
 
-        const selectArticle = (e) => {  
-            console.log(this.articleSelector.value)
+        const confirmDelete = () => {
+            if (window.confirm('Are you sure you want to delete this category?')) {
+                removeValue()
+            }
         }
+
+        const selectCategory = (e) => { 
+            /*select category is sending e.target.value as e */ 
+            console.log(e)
+            this.setState({selectedOption: e})
+            const getCategories = () => {
+                Axios.get('')
+                    .then((response) => {
+                      const data = response.data;
+                      console.log('Look at all this great stuff!');  
+                    })
+                    .catch(() => {
+                        console.log('No stuff to display')
+                    })
+            }
+        }
+
+        const modValue = (res, req) => {
+            //goal is to make the field inline editable
+            console.log('Gonna change a few things')
+            Axios.get('/updateArticle')
+                .then(res => {
+                    this.setState({isEditing: true})
+                    {(res.data.name = e.target.value)}
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
+
+        const displayCategories = () => {
+            const emptyCategory = []
+            for (let i=0; i < this.state.categoryValues.length; i++){
+                if (this.state.categoryValues[i].type === this.state.selectedOption) {
+                    emptyCategory.push(this.state.categoryValues[i])
+                }
+            }
+            // console.log('display category')
+            return emptyCategory.map((category) => (
+            <div key={category._id}>
+                <h3>{category.name}</h3>
+                <p>{category.rating}</p>
+                <button onClick={(e) => modValue(e)}>Edit</button>
+                <button onClick={() => modValue()}>Delete</button>
+            </div>
+            ));
+        };
 
         return (
             <>
             <h1>Lion and Witch absent, but you can still edit your Wardrobe!</h1>
         
-            <select ref='articleSelector' id='select' onChange={(e) => {selectArticle()}}>
-                {this.state.articles.map(article => (
+            <select ref='categorySelector' id='select' onChange={(e) => {selectCategory(e.target.value)}}>
+                {this.state.categories.map(category => (
                     <option 
-                        key={article.id} 
-                        value={article.article}
+                        key={category.name} 
+                        value={category.name}
                         // delete={removeValue.bind(article.id)}
                         >
-                        {article.article}
+                        {category.category}
                     </option>
                 ))}
             </select>
 
-            <div className='add-article'>
-                <input className='add-article' id='add' type='text' placeholder='add category'></input>
-                <button onClick={() => addValue()}>Add your new Clothing Category</button>
+            <div className='add-category'>
+                <input onChange={handleChange} value={this.state.addValue} className='add-category' id='add' type='text' placeholder='add category'></input>
+                <button onClick={() => addCategory()}>Add your new Clothing Category</button>
             </div>
-            <div className='remove-article'>
 
-            <button onClick={() => removeValue()}>Remove this Clothing Category</button>
+            <div className='remove-category'>
+                <button onClick={() => confirmDelete()}>Remove this Clothing Category</button>
+            </div>
+            
+            <div className='display-category-value'>
+                {this.state.selectedOption !== '' ? displayCategories(): null}                
+                
             </div>
 
         {/* <form onSubmit={handleSubmit(onSubmit)}>
