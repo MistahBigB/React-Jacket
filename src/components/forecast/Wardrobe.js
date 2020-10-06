@@ -1,7 +1,7 @@
 import Axios from 'axios';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import router from './routes/wardrobe';
+//import router from './routes/wardrobe.js';
 
 export default class Wardrobe extends React.Component {
     constructor(props) {
@@ -17,7 +17,7 @@ export default class Wardrobe extends React.Component {
                 { category: 'Accessories' }
             ],
             addValue: '',
-            categoryValues: null,
+            categoryValues: [],
             isEditing: false
         }
 
@@ -26,6 +26,7 @@ export default class Wardrobe extends React.Component {
     componentDidMount(){
         Axios.get('/wardrobe')
         .then(res => {
+            console.log(res, 'can you hear me')
             this.setState({categoryValues: res.data})
         })
         .catch(err => {
@@ -39,11 +40,16 @@ export default class Wardrobe extends React.Component {
             const context = {
                 category: this.state.addValue
             }
-            // re renders page while concatting context to current categories
-            // push does not work bc it returns an int of new array len, must use concat to return new array
-            this.setState({categories: this.state.categories.concat(context)})
+            this.state.categories.forEach(item => {
+                if (this.state.addValue !== this.state.categories.category) {
+                    // re renders page while concatting context to current categories
+                    // push does not work bc it returns an int of new array len, must use concat to return new array
+                    this.setState({categories: this.state.categories.concat(context)})
+                } else {
+                    alert(`You already have a category called ${this.state.addValue}`)
+                }
+            })
             // this.setState({document.getElementById('add').value = ''});
-            // need a check to see if category already exists
         }
 
         const handleChange = (evt) => {
@@ -54,7 +60,7 @@ export default class Wardrobe extends React.Component {
 
         }
 
-        const removeValue = () => {
+        const removeCategory = () => {
             this.state.categories.forEach(item => {
                 // console.log(item.category, this.state.selectedOption, 'all this')
                 if (item.category === this.state.selectedOption) {
@@ -67,9 +73,9 @@ export default class Wardrobe extends React.Component {
             // copyCategories.slice(this.state.categories.indexOf(selected), 1)
         }
 
-        const confirmDelete = () => {
+        const confirmCategoryDelete = () => {
             if (window.confirm('Are you sure you want to delete this category?')) {
-                removeValue()
+                removeCategory()
             }
         }
 
@@ -89,9 +95,9 @@ export default class Wardrobe extends React.Component {
             }
         }
 
-        const modValue = (res, req) => {
+        const modArticle = (res, req, e) => {
             //goal is to make the field inline editable
-            console.log('Gonna change a few things')
+            console.log('Gonna change this article!')
             Axios.get('/updateArticle')
                 .then(res => {
                     this.setState({isEditing: true})
@@ -100,6 +106,32 @@ export default class Wardrobe extends React.Component {
                     console.log(err)
                 })
             }
+
+        const confirmArticleDelete = (e) => {
+            if (window.confirm('Are you sure you want to delete this article?')) {
+                removeArticle(e)
+            }
+        }
+
+        const removeArticle = (categoryId) => {
+            console.log('Gonna delete this article!')
+            console.log(categoryId, "e.target.value")
+            Axios.post('/deleteArticle', {id: categoryId})
+                .then(
+                    //in order to rerender the page with new data
+                    // axios needs to be called again
+                    Axios.get('/wardrobe')
+                    .then(res => {
+                        // console.log(res, 'can you hear me now?')
+                        this.setState({categoryValues: res.data})
+                    }).catch(err => {
+                    console.log(err)
+                    })
+                ).catch(err => {
+                    console.log(err)
+                })
+            }
+            // copyCategories.slice(this.state.categories.indexOf(selected), 1)
 
         const displayCategories = () => {
             const emptyCategory = []
@@ -113,8 +145,8 @@ export default class Wardrobe extends React.Component {
             <div key={category._id}>
                 <h3>{category.name}</h3>
                 <p>{category.rating}</p>
-                <button onClick={(e) => modValue(e)}>Edit</button>
-                <button onClick={() => modValue()}>Delete</button>
+                <button onClick={(e) => modArticle(e)}>Edit</button>
+                <button onClick={() => confirmArticleDelete(category._id)}>Delete</button>
             </div>
             ));
         };
@@ -141,7 +173,7 @@ export default class Wardrobe extends React.Component {
             </div>
 
             <div className='remove-category'>
-                <button onClick={() => confirmDelete()}>Remove this Clothing Category</button>
+                <button onClick={() => confirmCategoryDelete()}>Remove this Clothing Category</button>
             </div>
             
             <div className='display-category-value'>
