@@ -40,15 +40,30 @@ export default class Wardrobe extends React.Component {
             const context = {
                 category: this.state.addValue
             }
-            this.state.categories.forEach(item => {
-                if (this.state.addValue !== this.state.categories.category) {
+            // string
+            console.log(typeof this.state.addValue)
+            // changing forEach to map still doesn't get to the if
+            this.state.categories.forEach(category => {    
+                
+                if (this.state.categories.category === context) {
+                    console.log(this.state.categories.category)
+                    alert(`You already have a category called ${context}`)
+                } else {
                     // re renders page while concatting context to current categories
                     // push does not work bc it returns an int of new array len, must use concat to return new array
                     this.setState({categories: this.state.categories.concat(context)})
-                } else {
-                    alert(`You already have a category called ${this.state.addValue}`)
+                    console.log('Added!')
                 }
             })
+            Axios.get('/wardrobe')
+                .then(res => {
+                console.log(res, 'can you hear me')
+                this.setState({categoryValues: res.data})
+                })
+                .catch(err => {
+                console.log(err)
+            })
+            console.log(this.state.categories)
             // this.setState({document.getElementById('add').value = ''});
         }
 
@@ -160,7 +175,6 @@ export default class Wardrobe extends React.Component {
                     <option 
                         key={category.name} 
                         value={category.name}
-                        // delete={removeValue.bind(article.id)}
                         >
                         {category.category}
                     </option>
