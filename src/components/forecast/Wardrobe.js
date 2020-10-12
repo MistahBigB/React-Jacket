@@ -1,6 +1,8 @@
 import Axios from 'axios';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import AddArticle from './addArticle.js';
+import addArticle, { showForm} from './addArticle.js';
 //import router from './routes/wardrobe.js';
 
 export default class Wardrobe extends React.Component {
@@ -18,7 +20,8 @@ export default class Wardrobe extends React.Component {
             ],
             addValue: '',
             categoryValues: [],
-            isEditing: false
+            isEditing: false,
+            showForm: false
         }
 
     }
@@ -110,6 +113,42 @@ export default class Wardrobe extends React.Component {
             }
         }
 
+        const addArticle = () => {
+            // hides button until a category is chosen
+            if (!displayCategories()) return null;
+
+            new AddArticle()
+
+            const context = {
+                category: this.state.addValue
+            }
+            // string
+            console.log(typeof this.state.addValue)
+            // changing forEach to map still doesn't get to the if
+            this.state.categories.forEach(article => {    
+                
+                if (this.state.categories.category.article === context) {
+                    console.log(this.state.categories.category.article)
+                    alert(`You already have an article called ${context}`)
+                } else {
+                    // re renders page while concatting context to current categories
+                    // push does not work bc it returns an int of new array len, must use concat to return new array
+                    this.setState({categories: this.state.categories.category.article.concat(context)})
+                    console.log('Added!')
+                }
+            })
+            Axios.post('/newArticle')
+                .then(res => {
+                console.log(res, 'can you hear me')
+                this.setState({categoryValues: res.data})
+                })
+                .catch(err => {
+                console.log(err)
+            })
+            console.log(this.state.categories)
+            // this.setState({document.getElementById('add').value = ''});
+        }
+
         const modArticle = (res, req, e) => {
             //goal is to make the field inline editable
             console.log('Gonna change this article!')
@@ -133,7 +172,7 @@ export default class Wardrobe extends React.Component {
             console.log(categoryId, "e.target.value")
             Axios.post('/deleteArticle', {id: categoryId})
                 .then(
-                    //in order to rerender the page with new data
+                    // in order to rerender the page with new data
                     // axios needs to be called again
                     Axios.get('/wardrobe')
                     .then(res => {
@@ -191,8 +230,8 @@ export default class Wardrobe extends React.Component {
             </div>
             
             <div className='display-category-value'>
-                {this.state.selectedOption !== '' ? displayCategories(): null}                
-                
+                {this.state.selectedOption !== '' ? displayCategories(): null}
+                <button id='add-article' onClick={() => addArticle()}>Add an Item</button>             
             </div>
 
         {/* <form onSubmit={handleSubmit(onSubmit)}>
