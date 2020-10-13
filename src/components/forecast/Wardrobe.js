@@ -1,6 +1,7 @@
 import Axios from 'axios';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { createContext } from 'vm';
 import AddArticle from './addArticle.js';
 import addArticle, { showForm} from './addArticle.js';
 //import router from './routes/wardrobe.js';
@@ -43,21 +44,20 @@ export default class Wardrobe extends React.Component {
             const context = {
                 category: this.state.addValue
             }
-            // string
-            console.log(typeof this.state.addValue)
-            // changing forEach to map still doesn't get to the if
-            this.state.categories.forEach(category => {    
-                
-                if (this.state.categories.category === context) {
-                    console.log(this.state.categories.category)
-                    alert(`You already have a category called ${context}`)
+            // console.log(typeof this.state.addValue)
+            // forEach runs the if AND else forEach item in categories and won't break, but for will
+            for (let i =0; i < this.state.categories.length; i++) {
+                if (this.state.categories[i].category === context.category) {
+                    console.log(this.state.categories[i].category)
+                    alert(`You already have a category called ${context.category}`)
+                    break
                 } else {
                     // re renders page while concatting context to current categories
                     // push does not work bc it returns an int of new array len, must use concat to return new array
                     this.setState({categories: this.state.categories.concat(context)})
                     console.log('Added!')
                 }
-            })
+            }
             Axios.get('/wardrobe')
                 .then(res => {
                 console.log(res, 'can you hear me')
@@ -200,7 +200,7 @@ export default class Wardrobe extends React.Component {
                 <h3>{category.name}</h3>
                 <p>{category.rating}</p>
                 <button onClick={(e) => modArticle(e)}>Edit</button>
-                <button onClick={() => confirmArticleDelete(category._id)}>Delete</button>
+                <button onClick={(category) => confirmArticleDelete(category._id)}>Delete</button>
             </div>
             ));
         };
@@ -231,7 +231,8 @@ export default class Wardrobe extends React.Component {
             
             <div className='display-category-value'>
                 {this.state.selectedOption !== '' ? displayCategories(): null}
-                <button id='add-article' onClick={() => addArticle()}>Add an Item</button>             
+                {this.state.selectedOption === '' ? null : <button id='add-article' onClick={() => addArticle()}>Add an Item</button>}
+
             </div>
 
         {/* <form onSubmit={handleSubmit(onSubmit)}>
