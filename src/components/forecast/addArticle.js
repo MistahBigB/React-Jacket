@@ -3,7 +3,13 @@ import React, { Component } from 'react';
 class AddArticle extends Component{
     constructor(props){
         super(props);
+        this.state = {value: ''};
     }
+
+    handleSubmit(evt) {
+        alert('A name was submitted: ' + this.state.value);
+        evt.preventDefault();
+      }
 
     showForm = () => {
        return (
@@ -16,7 +22,7 @@ class AddArticle extends Component{
                    <label>Rating ('Hot', 'Warm', or 'Cool'): </label>
                    <input type="text" ></input>
 
-                   <button>Add Article</button>
+                   <button onSubmit=''>Add Article</button>
               </form>
           </div>
        );

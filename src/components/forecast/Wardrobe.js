@@ -2,8 +2,7 @@ import Axios from 'axios';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createContext } from 'vm';
-import AddArticle from './addArticle.js';
-import addArticle, { showForm} from './addArticle.js';
+import AddArticle, { showForm } from './addArticle.js';
 //import router from './routes/wardrobe.js';
 
 export default class Wardrobe extends React.Component {
@@ -46,7 +45,7 @@ export default class Wardrobe extends React.Component {
             }
             // console.log(typeof this.state.addValue)
             // forEach runs the if AND else forEach item in categories and won't break, but for will
-            for (let i =0; i < this.state.categories.length; i++) {
+            for (let i = 0; i < this.state.categories.length; i++) {
                 if (this.state.categories[i].category === context.category) {
                     console.log(this.state.categories[i].category)
                     alert(`You already have a category called ${context.category}`)
@@ -58,24 +57,32 @@ export default class Wardrobe extends React.Component {
                     console.log('Added!')
                 }
             }
+            Axios.post('/addCategory')
+                .then(req => {
+                    console.log(req, 'trying to add a category')
+                    // but where, when 'category' is just the name of an attibute
+                    // i.e. an article property
+                })
+                .catch(err => {
+                    console.log(err)
+                })
             Axios.get('/wardrobe')
                 .then(res => {
-                console.log(res, 'can you hear me')
+                console.log(res, 'objects in the wardrobe')
                 this.setState({categoryValues: res.data})
                 })
                 .catch(err => {
-                console.log(err)
+                    console.log(err)
             })
             console.log(this.state.categories)
             // this.setState({document.getElementById('add').value = ''});
         }
-
-        const handleChange = (evt) => {
-            // handles the change for adding values
+        
+        // handles the change for adding values
+        const handleChange = (evt) => {    
             evt.preventDefault();
             console.log(evt.target.value)
             this.setState({addValue: evt.target.value})
-
         }
 
         const removeCategory = () => {
@@ -115,31 +122,39 @@ export default class Wardrobe extends React.Component {
 
         const addArticle = () => {
             // hides button until a category is chosen
-            if (!displayCategories()) return null;
+            // if (!displayCategories()) return null;
 
             new AddArticle()
 
             const context = {
                 category: this.state.addValue
             }
-            // string
-            console.log(typeof this.state.addValue)
-            // changing forEach to map still doesn't get to the if
-            this.state.categories.forEach(article => {    
-                
-                if (this.state.categories.category.article === context) {
-                    console.log(this.state.categories.category.article)
+            console.log(this.state.selectedOption, 'selected option')
+
+            // has the db values ready to check against
+            Axios.get('/wardrobe')
+                .then(res => {
+                console.log(res, 'selected option values')
+                this.setState({categoryValues: res.data})
+                }).catch(err => {
+                console.log(err)
+                })
+            showForm()
+            for (let i = 0; i < this.state.categoryValues.length; i++) {    
+                if (this.state.categoryValues[i] === context) {
+                    console.log(this.state.categoryValues)
                     alert(`You already have an article called ${context}`)
+                    break
                 } else {
                     // re renders page while concatting context to current categories
                     // push does not work bc it returns an int of new array len, must use concat to return new array
-                    this.setState({categories: this.state.categories.category.article.concat(context)})
+                    this.setState({categories: this.state.categoryValues.concat(context)})
                     console.log('Added!')
                 }
-            })
+            }
             Axios.post('/newArticle')
                 .then(res => {
-                console.log(res, 'can you hear me')
+                console.log(res, 'adding an article')
                 this.setState({categoryValues: res.data})
                 })
                 .catch(err => {
@@ -209,7 +224,7 @@ export default class Wardrobe extends React.Component {
             <>
             <h1>Lion and Witch absent, but you can still edit your Wardrobe!</h1>
         
-            <select ref='categorySelector' id='select' onChange={(e) => {selectCategory(e.target.value)}}>
+            <select ref='category-selector' id='select' onChange={(e) => {selectCategory(e.target.value)}}>
                 {this.state.categories.map(category => (
                     <option 
                         key={category.name} 
