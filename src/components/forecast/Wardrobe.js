@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createContext } from 'vm';
 import AddArticle, { showForm } from './addArticle.js';
-//import router from './routes/wardrobe.js';
+
 
 export default class Wardrobe extends React.Component {
     constructor(props) {
@@ -29,7 +29,7 @@ export default class Wardrobe extends React.Component {
     componentDidMount(){
         Axios.get('/wardrobe')
         .then(res => {
-            console.log(res, 'can you hear me')
+            console.log(res, 'component did mount!')
             this.setState({categoryValues: res.data})
         })
         .catch(err => {
@@ -45,6 +45,18 @@ export default class Wardrobe extends React.Component {
             }
             // console.log(typeof this.state.addValue)
             // forEach runs the if AND else forEach item in categories and won't break, but for will
+            fetch(
+                '/addCategory',
+                {
+                    method: 'post',
+                    body: JSON.stringify({
+                        name: this.state.addValue
+                    })
+                }).then(res =>
+                    res.json()
+                    ).then(
+                        data => console.log(data)
+                    )
             for (let i = 0; i < this.state.categories.length; i++) {
                 if (this.state.categories[i].category === context.category) {
                     console.log(this.state.categories[i].category)
@@ -53,25 +65,26 @@ export default class Wardrobe extends React.Component {
                 } else {
                     // re renders page while concatting context to current categories
                     // push does not work bc it returns an int of new array len, must use concat to return new array
+
                     this.setState({categories: this.state.categories.concat(context)})
                     console.log('Added!')
                 }
             }
-            Axios.post('/addCategory')
-                .then(req => {
-                    console.log(req, 'trying to add a category')
-                    // but where, when 'category' is just the name of an attibute
-                    // i.e. an article property
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+
+            // Axios.post({
+            //     method: 'post',
+            //     url: '/addCategory',
+            //     data: {
+            //       name: 'DOOOM'
+            //     }
+            //   }).then(res => {
+            //       console.log(res, 'add category response')
+            //   })
             Axios.get('/wardrobe')
                 .then(res => {
                 console.log(res, 'objects in the wardrobe')
                 this.setState({categoryValues: res.data})
-                })
-                .catch(err => {
+                }).catch(err => {
                     console.log(err)
             })
             console.log(this.state.categories)
@@ -87,15 +100,22 @@ export default class Wardrobe extends React.Component {
 
         const removeCategory = () => {
             this.state.categories.forEach(item => {
-                // console.log(item.category, this.state.selectedOption, 'all this')
+                // console.log(item.category, this.state.selectedOption, 'remove all this')
                 if (item.category === this.state.selectedOption) {
-                    // console.log('getting there!')
+                    console.log('trying to delete a category')
                     this.state.categories.splice(this.state.categories.indexOf(item), 1)
                     // console.log(this.state.categories)
                     this.setState({categories: this.state.categories})
                 }
             })
             // copyCategories.slice(this.state.categories.indexOf(selected), 1)
+            Axios.post('/deleteCategory')
+                .then(req => {
+                    console.log(req, 'category deleted!')
+                }).catch(err => {
+                console.log(err)
+            })
+            
         }
 
         const confirmCategoryDelete = () => {
@@ -109,7 +129,7 @@ export default class Wardrobe extends React.Component {
             console.log(e)
             this.setState({selectedOption: e})
             const getCategories = () => {
-                Axios.get('')
+                Axios.get('/Wardrobe')
                     .then((response) => {
                       const data = response.data;
                       console.log('Look at all this great stuff!');  
@@ -125,6 +145,7 @@ export default class Wardrobe extends React.Component {
             // if (!displayCategories()) return null;
 
             new AddArticle()
+            this.state.showForm = true
 
             const context = {
                 category: this.state.addValue
@@ -139,7 +160,9 @@ export default class Wardrobe extends React.Component {
                 }).catch(err => {
                 console.log(err)
                 })
-            showForm()
+            
+            
+
             for (let i = 0; i < this.state.categoryValues.length; i++) {    
                 if (this.state.categoryValues[i] === context) {
                     console.log(this.state.categoryValues)

@@ -1,3 +1,4 @@
+import Axios from 'axios';
 import React, { Component } from 'react';
 
 class AddArticle extends Component{
@@ -9,6 +10,8 @@ class AddArticle extends Component{
     handleSubmit(evt) {
         alert('A name was submitted: ' + this.state.value);
         evt.preventDefault();
+
+        Axios.post('/addArticle')
       }
 
     showForm = () => {
@@ -17,12 +20,14 @@ class AddArticle extends Component{
                <form id="add-article">
 
                    <label>Article Name: </label>
-                   <input type="text"> </input>
+                   <input type="text" required> </input>
 
-                   <label>Rating ('Hot', 'Warm', or 'Cool'): </label>
-                   <input type="text" ></input>
+                   <label>Rating: ('Hot', 'Warm', or 'Cool'): </label>
+                   <input type="text" required></input>
 
-                   <button onSubmit=''>Add Article</button>
+                   <label>Category: {this.state.selectedOption}</label>
+
+                   <button onSubmit={this.handleSubmit}>Add Article</button>
               </form>
           </div>
        );
